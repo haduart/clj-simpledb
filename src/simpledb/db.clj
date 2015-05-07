@@ -68,17 +68,17 @@
     (apply-to-keys convert-underscores)))
 
 (defn get-everything [db-spec table]
-  (jdbc/query db-spec (->
-                        (select :*)
-                        (from table)
-                        sql/format)))
+  (map decode-keys (jdbc/query db-spec (->
+                                         (select :*)
+                                         (from table)
+                                         sql/format))))
 
 (defn get-values [db-spec table id]
   (map decode-keys (jdbc/query db-spec (->
-                        (select :*)
-                        (from table)
-                        (where [:= :id id])
-                        sql/format))))
+                                         (select :*)
+                                         (from table)
+                                         (where [:= :id id])
+                                         sql/format))))
 
 (defn count-all-values [db-spec table]
   (jdbc/query db-spec (->
@@ -120,10 +120,10 @@
 
 (defn get-everything-user [db-spec table username]
   (map decode-keys (jdbc/query db-spec (->
-                        (select :*)
-                        (from table)
-                        (where [:= :username username])
-                        sql/format))))
+                                         (select :*)
+                                         (from table)
+                                         (where [:= :username username])
+                                         sql/format))))
 
 (deftype SimpleDB [db-spec table]
   clojure.lang.Counted
