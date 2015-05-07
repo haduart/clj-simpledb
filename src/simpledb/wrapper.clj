@@ -89,6 +89,12 @@
   (let [historian-db (newDB @db-spec database)]
     (db/get-user-view historian-db username)))
 
+(defn remove-user-view!
+  "Removes a concrete view for the user"
+  [^String database ^String username]
+  (let [historian-db (newDB @db-spec database)]
+    (db/remove-user-view! historian-db database username)))
+
 (defn remove-configuration-watch [^clojure.lang.IRef reference]
   (remove-watch reference :configuration))
 
@@ -122,9 +128,9 @@
   (init [this]
     (when (server-is-up? (cast-namespace (:namespace this)))
       (when (first-time? (cast-namespace (:namespace this)))
-        (store (cast-namespace (:namespace this)) :configuration @(:reference this)))
+        (store (cast-namespace (:namespace this))  ":configuration" @(:reference this)))
       (->
-        (get-value (cast-namespace (:namespace this)) :configuration)
+        (get-value (cast-namespace (:namespace this)) ":configuration")
         (dissoc :_id :_rev)
         (override-reference (:reference this)))
       (add-configuration-watch (:namespace this) (:reference this)))))
