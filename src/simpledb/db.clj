@@ -2,7 +2,8 @@
   (:require [clojure.data.json :as json]
             [clojure.java.jdbc :as jdbc]
             [honeysql.core :as sql]
-            [honeysql.helpers :refer :all]))
+            [honeysql.helpers :refer :all])
+  (:import [org.joda.time DateTime]))
 
 (defprotocol SimpleViewsOps
   "Defines side-effecting operations on a CouchDB database.
@@ -44,9 +45,10 @@
   (into {} (for [[k v] m] [(f k) v])))
 
 (defn- encode-value [v]
-  (if (coll? v)
-    (str "~json~" (json/write-str v))
-    v))
+  (cond
+    (coll? v) (str "~json~" (json/write-str v))
+    (instance? DateTime v) (str v)
+    :else v))
 
 (defn- decode-value [v]
   (if (and (string? v) (.startsWith v "~json~"))
@@ -71,27 +73,27 @@
   (map decode-keys (jdbc/query db-spec (->
                                          (select :*)
                                          (from table)
-                                         sql/format))))
+                                         sql/format) :identifiers identity)))
 
 (defn get-values [db-spec table id]
   (map decode-keys (jdbc/query db-spec (->
                                          (select :*)
                                          (from table)
                                          (where [:= :id id])
-                                         sql/format))))
+                                         sql/format) :identifiers identity)))
 
 (defn count-all-values [db-spec table]
   (jdbc/query db-spec (->
                         (select :%count.id)
                         (from table)
-                        sql/format)))
+                        sql/format) :identifiers identity))
 
 (defn- update-value [db-spec table id value]
   (jdbc/execute! db-spec (->
                            (update table)
                            (sset value)
                            (where [:= :id id])
-                           sql/format)))
+                           sql/format) ))
 
 (defn- insert-value [db-spec table id value]
   (jdbc/execute! db-spec (->
@@ -123,7 +125,7 @@
                                          (select :*)
                                          (from table)
                                          (where [:= :username username])
-                                         sql/format))))
+                                         sql/format) :identifiers identity)))
 
 (deftype SimpleDB [db-spec table]
   clojure.lang.Counted

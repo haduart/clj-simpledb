@@ -18,29 +18,26 @@
     => {:result {:ok true, :id ":configuration", :rev "2-16870bc1dc06755b895ba715da9041ce"}}))
 
 (fact "Get values for the configuration"
-  (couchdb/get-value currentNamespace :configuration ) => {:_id ":configuration"
-                                                           :_rev "3-887ec7ea147165566a5ac5948eb7c383"
-                                                           :server "pi-connector-test.dsquare.intra"
-                                                           :username "Daniil"
-                                                           :password "password"}
-  (provided (db/newDB anything currentNamespace) => {:configuration {:_id ":configuration"
-                                                                         :_rev "3-887ec7ea147165566a5ac5948eb7c383"
-                                                                         :server "pi-connector-test.dsquare.intra"
-                                                                         :username "Daniil"
-                                                                         :password "password"}}))
+  (couchdb/get-value currentNamespace :configuration) => {:_id      ":configuration"
+                                                          :_rev     "3-887ec7ea147165566a5ac5948eb7c383"
+                                                          :server   "pi-connector-test.dsquare.intra"
+                                                          :username "Daniil"
+                                                          :password "password"}
+  (provided (db/newDB anything currentNamespace) => {:configuration {:_id      ":configuration"
+                                                                     :_rev     "3-887ec7ea147165566a5ac5948eb7c383"
+                                                                     :server   "pi-connector-test.dsquare.intra"
+                                                                     :username "Daniil"
+                                                                     :password "password"}}))
 
 (fact "update configuration"
-  (couchdb/update-value currentNamespace :configuration {:username "edu" :password "edu-passowrd" :server "pi-connector-test.dsquare.intra"}) => anything
+  (couchdb/update-value currentNamespace ":configuration" {:username "edu" :password "edu-passowrd" :server "pi-connector-test.dsquare.intra"}) => anything
 
-  (provided (db/newDB anything currentNamespace) => {:configuration {:_id ":configuration"
-                                                                         :_rev "3-887ec7ea147165566a5ac5948eb7c383"
-                                                                         :server "pi-connector-test.dsquare.intra"
-                                                                         :username "Daniil"
-                                                                         :password "password"}})
+  (provided (db/newDB anything currentNamespace) => {":configuration" {:server   "pi-connector-test.dsquare.intra"
+                                                                       :username "Daniil"
+                                                                       :password "password"}})
   (provided (db/assoc!
-              anything :configuration {:_rev "3-887ec7ea147165566a5ac5948eb7c383"
-                                       :server "pi-connector-test.dsquare.intra"
-                                       :username "edu", :password "edu-passowrd"}) => anything))
+              anything ":configuration" {:server   "pi-connector-test.dsquare.intra"
+                                         :username "edu", :password "edu-passowrd"}) => anything))
 
 (fact "update configuration when the key does not exist"
   (couchdb/update-value currentNamespace :configuration {:username "edu"}) => anything
@@ -52,7 +49,7 @@
 
 (def testAtom (atom {:username "Daniil"
                      :password "password"
-                     :server "pi-connector-test.dsquare.intra"}))
+                     :server   "pi-connector-test.dsquare.intra"}))
 
 (def currentNamespace *ns*)
 (def db (couchdb/database currentNamespace testAtom))
@@ -66,13 +63,11 @@
   (couchdb/init db) => anything
   (provided (couchdb/server-is-up? "simpledb-wrapper-test") => true)
   (provided (couchdb/first-time? "simpledb-wrapper-test") => false)
-  (provided (couchdb/get-value "simpledb-wrapper-test" :configuration )
-    => {:_id ":configuration"
-        :_rev "3-887ec7ea147165566a5ac5948eb7c383"
-        :server "pi-connector-test.dsquare.intra"
+  (provided (couchdb/get-value "simpledb-wrapper-test" ":configuration")
+    => {:server   "pi-connector-test.dsquare.intra"
         :username "Daniil"
         :password "password"})
-  (provided (couchdb/override-reference {:server "pi-connector-test.dsquare.intra"
+  (provided (couchdb/override-reference {:server   "pi-connector-test.dsquare.intra"
                                          :username "Daniil"
                                          :password "password"} testAtom) => anything)
   (provided (couchdb/add-configuration-watch currentNamespace testAtom) => anything))
@@ -81,10 +76,10 @@
   (couchdb/init db) => anything
   (provided (couchdb/server-is-up? "simpledb-wrapper-test") => true)
   (provided (couchdb/first-time? "simpledb-wrapper-test") => true)
-  (provided (couchdb/store "simpledb-wrapper-test" :configuration {:username "Daniil" :password "password" :server "pi-connector-test.dsquare.intra"}) => anything)
-  (provided (couchdb/get-value "simpledb-wrapper-test" :configuration )
-    => {:_id ":configuration", :_rev "3-887ec7ea147165566a5ac5948eb7c383", :server "pi-connector-test.dsquare.intra", :username "Daniil", :password "password"})
-  (provided (couchdb/override-reference {:server "pi-connector-test.dsquare.intra"
+  (provided (couchdb/store "simpledb-wrapper-test" ":configuration" {:username "Daniil" :password "password" :server "pi-connector-test.dsquare.intra"}) => anything)
+  (provided (couchdb/get-value "simpledb-wrapper-test" ":configuration")
+    => {:server "pi-connector-test.dsquare.intra" :username "Daniil" :password "password"})
+  (provided (couchdb/override-reference {:server   "pi-connector-test.dsquare.intra"
                                          :username "Daniil"
                                          :password "password"} testAtom) => anything)
   (provided (couchdb/add-configuration-watch currentNamespace testAtom) => anything))
