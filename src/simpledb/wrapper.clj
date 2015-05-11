@@ -5,8 +5,8 @@
   (:import [clojure.lang Keyword]))
 
 (def db-spec (atom {:subprotocol "mysql"
-                     :subname     "//localhost:3306/hps"
-                     :user        "root"}))
+                    :subname     "//localhost:3306/hps"
+                    :user        "root"}))
 
 (defn count-db [historianDB]
   (count historianDB))
@@ -53,13 +53,9 @@
     (get historianDB key)))
 
 (defn update-value [^String database ^Keyword key map]
-  (let [historianDB (newDB @db-spec database)
-        keyValue (get historianDB key)]
-    (->>
-      (if (not (nil? keyValue))
-        (assoc map :_rev (:_rev keyValue))
-        map)
-      (db/assoc! historianDB key))))
+  (->
+    (newDB @db-spec database)
+    (db/assoc! key map)))
 
 (defn create-view!
   "Creates a Javascript view. You have to specify the database name,
@@ -89,6 +85,12 @@
   (let [historian-db (newDB @db-spec database)]
     (db/get-user-view historian-db username)))
 
+(defn remove-user-view!
+  "Removes a concrete view for the user"
+  [^String database ^String username]
+  (let [historian-db (newDB @db-spec database)]
+    (db/remove-user-view! historian-db database username)))
+
 (defn remove-configuration-watch [^clojure.lang.IRef reference]
   (remove-watch reference :configuration))
 
@@ -105,7 +107,7 @@
                                ^clojure.lang.IRef reference]
   (add-watch reference
     :configuration (fn [key reference old-state new-state]
-                     (update-value (cast-namespace namespace) :configuration new-state))))
+                     (update-value (cast-namespace namespace) ":configuration" (dissoc new-state :_id :_rev)))))
 
 (defprotocol DatabaseHandler
   (init [this])
@@ -122,9 +124,9 @@
   (init [this]
     (when (server-is-up? (cast-namespace (:namespace this)))
       (when (first-time? (cast-namespace (:namespace this)))
-        (store (cast-namespace (:namespace this)) :configuration @(:reference this)))
+        (store (cast-namespace (:namespace this)) ":configuration" @(:reference this)))
       (->
-        (get-value (cast-namespace (:namespace this)) :configuration)
+        (get-value (cast-namespace (:namespace this)) ":configuration")
         (dissoc :_id :_rev)
         (override-reference (:reference this)))
       (add-configuration-watch (:namespace this) (:reference this)))))

@@ -1,4 +1,4 @@
-(defproject simpledb "0.1.0"
+(defproject simpledb "0.1.9-SNAPSHOT"
   :description "Simple SQL database access"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -7,7 +7,8 @@
                  [org.clojure/java.jdbc "0.3.6"]
                  [mysql/mysql-connector-java "5.1.25"]
                  [honeysql "0.5.2"]
-                 [org.clojure/data.json "0.2.4"]]
+                 [org.clojure/data.json "0.2.4"]
+                 [clj-time "0.9.0"]]
 
   :plugins [[lein-midje "3.1.3"]
             [lein-pprint "1.1.1"]
