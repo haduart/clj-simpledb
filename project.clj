@@ -1,4 +1,4 @@
-(defproject simpledb "0.1.9-SNAPSHOT"
+(defproject simpledb "0.1.10-SNAPSHOT"
   :description "Simple SQL database access"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -25,7 +25,8 @@
 
   :min-lein-version "2.0.0"
 
-  :profiles {:dev {:dependencies [[midje "1.6.3"]]}
+  :profiles {:dev {:dependencies [[midje "1.6.3"]
+                                  [mysql/mysql-connector-java "5.1.25"]]}
              :1.5 {:dependencies [[org.clojure/clojure "1.5.1"]]}
              :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}
              :1.7 {:dependencies [[org.clojure/clojure "1.7.0-alpha1"]]}}
