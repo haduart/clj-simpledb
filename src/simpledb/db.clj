@@ -6,6 +6,10 @@
             [honeysql.helpers :refer :all])
   (:import [org.joda.time DateTime]))
 
+(defn- with-result-meta
+  [db result]
+  (vary-meta db assoc :result result))
+
 (defprotocol SimpleViewsOps
   "Defines side-effecting operations on a CouchDB database.
   It extends clutch with some extra methods."
@@ -94,7 +98,7 @@
                            (update table)
                            (sset value)
                            (where [:= :id id])
-                           sql/format) ))
+                           sql/format)))
 
 (defn- insert-value [db-spec table id value]
   (jdbc/execute! db-spec (->
@@ -128,7 +132,7 @@
                                          (where [:= :username username])
                                          sql/format) :identifiers identity)))
 
-(deftype SimpleDB [db-spec table]
+(deftype SimpleDB [db-spec table meta]
   clojure.lang.Counted
   (count [this]
     (get (first (count-all-values db-spec table)) (keyword "count(id)")))
@@ -147,11 +151,20 @@
   (invoke [this key] (.valAt this key))
   (invoke [this key default] (.valAt this key default))
 
+  clojure.lang.IMeta
+  (meta [this] meta)
+
+  clojure.lang.IObj
+  (withMeta [this meta] (SimpleDB. db-spec table meta))
+
   SimpleOps
   (create! [this] this)
   (assoc! [this id value]
-    (jdbc/with-db-transaction [trans-conn db-spec]
-      (update-or-insert-value trans-conn table id value)))
+    (do
+      (jdbc/with-db-transaction [trans-conn db-spec]
+        (update-or-insert-value trans-conn table id value))
+      (with-result-meta this
+        (assoc value :id id))))
   (dissoc! [this id-or-doc]
     (let [id (if (map? id-or-doc)
                (:id id-or-doc)
@@ -180,5 +193,8 @@
       (get-everything-user db-spec table username)
       (map (fn [doc] {:id (:id doc) :value doc})))))
 
-(defn newDB [db-spec table]
-  (->SimpleDB db-spec (keyword table)))
+(defn newDB
+  ([db-spec table]
+   (->SimpleDB db-spec (keyword table) nil))
+  ([db-spec table meta]
+   (->SimpleDB db-spec (keyword table) meta)))
