@@ -1,4 +1,5 @@
 (ns simpledb.db
+  (:refer-clojure :exclude [dissoc! assoc!])
   (:require [clojure.data.json :as json]
             [clojure.java.jdbc :as jdbc]
             [honeysql.core :as sql]
