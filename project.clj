@@ -1,4 +1,4 @@
-(defproject simpledb "0.1.11-SNAPSHOT"
+(defproject simpledb "0.1.12-SNAPSHOT"
   :description "Simple SQL database access"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
