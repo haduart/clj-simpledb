@@ -5,9 +5,11 @@
             [clojure.java.jdbc :as jdbc])
   (:import [clojure.lang Keyword]))
 
-(def dev-db {:subprotocol "mysql"
+(def dev-db {:classname   "com.mysql.jdbc.Driver"
+             :subprotocol "mysql"
              :subname     "//localhost:3306/hps"
-             :user        "root"})
+             :user        "root"
+             :password    ""})
 
 (def prd-db {:name "java:/jboss/datasources/dsq-hps-ds"})
 
@@ -16,7 +18,8 @@
   []
   (try
     (do
-      (jdbc/get-connection prd-db)
+      (-> (jdbc/get-connection prd-db)
+        (.close))
       prd-db)
     (catch Exception e dev-db)))
 
