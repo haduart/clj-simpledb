@@ -1,18 +1,20 @@
 (ns simpledb.wrapper
-  (:use [simpledb.db :only (newDB drop! up? exist? create!)])
+  (:use [simpledb.db :only (newDB drop! up? exists? create!)])
   (:require [simpledb.db :as db]
             [clojure.string :as string]
             [clojure.java.jdbc :as jdbc])
   (:import [clojure.lang Keyword]))
 
+;TODO: delete & extract
 (def dev-db {:classname   "com.mysql.jdbc.Driver"
              :subprotocol "mysql"
              :subname     "//localhost:3306/hps"
              :user        "root"
              :password    ""})
-
+;TODO: delete & extract
 (def prd-db {:name "java:/jboss/datasources/dsq-hps-ds"})
 
+;TODO: delete
 (defn temporary-jndi-check
   "Checks if it can use JNDI otherwise it uses a hardcoded connection"
   []
@@ -30,13 +32,13 @@
   (let [historianDB (newDB (temporary-jndi-check) database)]
     (up? historianDB)))
 
-(defn database-exist? [database]
+(defn database-exists? [database]
   (let [historianDB (newDB (temporary-jndi-check) database)]
-    (exist? historianDB)))
+    (exists? historianDB)))
 
 (defn create-db [^String database]
   (let [historianDB (newDB (temporary-jndi-check) database)]
-    (if-not (exist? historianDB)
+    (if-not (exists? historianDB)
       (db/create! historianDB))))
 
 (defn drop-db [^String database]
@@ -45,7 +47,7 @@
 
 (defn first-time? [^String database]
   (let [historianDB (newDB (temporary-jndi-check) database)]
-    (if-not (exist? historianDB)
+    (if-not (exists? historianDB)
       (do
         (db/create! historianDB)
         true)
@@ -72,36 +74,31 @@
     (newDB (temporary-jndi-check) database)
     (db/assoc! key map)))
 
+;TODO: delete
 (defn create-view!
-  "Creates a Javascript view. You have to specify the database name,
-  the design name, the view name and the javascript function"
   [^String database ^String design-name ^String view-name ^String javascript-function]
   (let [historian-db (newDB (temporary-jndi-check) database)]
     (db/create-view! historian-db design-name view-name javascript-function)))
 
+;TODO: delete
 (defn get-view
-  "Returns a couchdb view. You have to specify the database name,
-  the design name and the view name.
-  Returns a lazy-seq on the couchdb view"
   [^String database ^String design-name ^String view-name]
   (db/get-view database design-name (keyword view-name)))
 
+;TODO: delete
 (defn create-user-view!
-  "The design name it will be in the database name with '-' and username.
-  The same for the view name. Creates a concrete view for the user"
   [^String database ^String username ^String javascript-function]
   (let [historian-db (newDB (temporary-jndi-check) database)]
     (db/create-user-view! historian-db username javascript-function)))
 
+;TODO: delete
 (defn get-user-view
-  "The design name it will be the database name with '-' and username.
-  The same for the view name. Returns a lazy-seq on the couchdb view."
   [^String database ^String username]
   (let [historian-db (newDB (temporary-jndi-check) database)]
     (db/get-user-view historian-db username)))
 
+;TODO: delete
 (defn remove-user-view!
-  "Removes a concrete view for the user"
   [^String database ^String username]
   (let [historian-db (newDB (temporary-jndi-check) database)]
     (db/remove-user-view! historian-db database username)))
@@ -124,6 +121,7 @@
     :configuration (fn [key reference old-state new-state]
                      (update-value (cast-namespace namespace) ":configuration" (dissoc new-state :_id :_rev)))))
 
+;TODO: delete & extract
 (defprotocol DatabaseHandler
   (init [this])
   (destroy [this]))

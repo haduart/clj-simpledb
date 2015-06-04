@@ -10,6 +10,7 @@
   [db result]
   (vary-meta db assoc :result result))
 
+;TODO: delete & extract
 (defprotocol SimpleViewsOps
   "Defines side-effecting operations on a CouchDB database.
   It extends clutch with some extra methods."
@@ -25,8 +26,7 @@
    All operations return the CouchDB database reference —
    with the return value from the underlying clutch function
    added to its :result metadata — for easy threading and
-   reduction usage.
-   (EXPERIMENTAL!)"
+   reduction usage."
   (create! [this] "Ensures that the database exists, and returns the database's meta info.")
   (assoc! [this id document]
     "PUTs a document into CouchDB. Equivalent to (conj! couch [id document]).")
@@ -39,8 +39,8 @@
   "Create / Delete views.
   It extends clutch with some extra methods."
   (drop! [this] "DELETES a database. It returns {:ok true} if it works")
-  (up? [this] "Checks if the server is up")
-  (exist? [this] "Checks if the database exists")
+  (up? [this] "Checks if the server is up") ;TODO: delete & extract
+  (exists? [this] "Checks if the database exists")
   (take-all [this] "Returns all the items of a database"))
 
 (defn- apply-to-values [m f]
@@ -125,6 +125,7 @@
                            (delete-from table)
                            sql/format)))
 
+;TODO: delete & extract
 (defn get-everything-user [db-spec table username]
   (map decode-keys (jdbc/query db-spec (->
                                          (select :*)
@@ -173,10 +174,11 @@
 
   SimpleExtOps
   (drop! [this] (clean-table db-spec table))
-  (up? [this] true)
-  (exist? [this] true)
+  (up? [this] true) ;TODO: delete & extract
+  (exists? [this] true) ;TODO: implement
   (take-all [this] (take (count this) this))
 
+  ;TODO: delete & extract
   SimpleViewsOps
   (create-view! [this design-name view-name javascript-function]
     nil)

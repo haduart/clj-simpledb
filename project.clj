@@ -1,12 +1,12 @@
-(defproject simpledb "0.1.14-SNAPSHOT"
+(defproject simpledb "0.1.15-SNAPSHOT"
   :description "Simple SQL database access"
-  :url "http://example.com/FIXME"
-  :license {:name "Eclipse Public License"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :url "https://github.com/haduart/clj-simpledb"
+  :license {:name "BSD"
+            :url "http://www.opensource.org/licenses/BSD-3-Clause"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/java.jdbc "0.3.6"]
                  [honeysql "0.5.2"]
-                 [org.clojure/data.json "0.2.4"]
+                 [org.clojure/data.json "0.2.6"]
                  [clj-time "0.9.0"]]
 
   :plugins [[lein-midje "3.1.3"]
@@ -15,13 +15,6 @@
 
   :repl-options {:welcome (println "Welcome to the magical world of the repl!")
                  :port 4004}
-
-  :deploy-repositories [["releases" {:url "http://nexus.dsquare.intra/content/repositories/hps-releases"
-                                     :sign-releases false}]
-                        ["snapshots" {:url "http://nexus.dsquare.intra/content/repositories/hps-snapshots"
-                                      :sign-releases false}]]
-  :mirrors {"central" {:name "nexus"
-                       :url "http://nexus.dsquare.intra/content/groups/public"}}
 
   :min-lein-version "2.0.0"
 
