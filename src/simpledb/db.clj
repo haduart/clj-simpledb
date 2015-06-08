@@ -28,7 +28,9 @@
    added to its :result metadata — for easy threading and
    reduction usage."
   (create! [this] "Ensures that the database exists, and returns the database's meta info.")
-  (assoc! [this id document]
+  (assoc!
+    [this document]
+    [this id document]
     "PUTs a document into CouchDB. Equivalent to (conj! couch [id document]).")
   (dissoc! [this id-or-doc]
     "DELETEs a document from CouchDB. Uses a given document map's :_id and :_rev
@@ -39,7 +41,7 @@
   "Create / Delete views.
   It extends clutch with some extra methods."
   (drop! [this] "DELETES a database. It returns {:ok true} if it works")
-  (up? [this] "Checks if the server is up") ;TODO: delete & extract
+  (up? [this] "Checks if the server is up")                 ;TODO: delete & extract
   (exists? [this] "Checks if the database exists")
   (take-all [this] "Returns all the items of a database"))
 
@@ -62,17 +64,17 @@
 
 (defn- convert-underscores [v]
   (-> v
-    name
-    (clojure.string/replace "_" "-")
-    keyword))
+      name
+      (clojure.string/replace "_" "-")
+      keyword))
 
 (defn- encode-keys [m]
   (apply-to-values m encode-value))
 
 (defn- decode-keys [m]
   (-> m
-    (apply-to-values decode-value)
-    (apply-to-keys convert-underscores)))
+      (apply-to-values decode-value)
+      (apply-to-keys convert-underscores)))
 
 (defn get-everything [db-spec table]
   (map decode-keys (jdbc/query db-spec (->
@@ -108,8 +110,8 @@
 
 (defn update-or-insert-value [trans-conn table id value]
   (let [id-value (-> value
-                   (assoc :id id)
-                   (encode-keys))
+                     (assoc :id id)
+                     (encode-keys))
         updated? (> (first (update-value trans-conn table id id-value)) 0)]
     (when-not updated?
       (insert-value trans-conn table id id-value))))
@@ -160,12 +162,21 @@
 
   SimpleOps
   (create! [this] this)
+  (assoc! [this value]
+    (do
+      (jdbc/with-db-transaction [trans-conn db-spec]
+                                (->>
+                                  value
+                                  encode-keys
+                                  (insert-value trans-conn table nil)))
+      (with-result-meta this value)))
   (assoc! [this id value]
     (do
       (jdbc/with-db-transaction [trans-conn db-spec]
-        (update-or-insert-value trans-conn table id value))
+                                (update-or-insert-value trans-conn table id value))
       (with-result-meta this
-        (assoc value :id id))))
+                        (assoc value :id id))))
+
   (dissoc! [this id-or-doc]
     (let [id (if (map? id-or-doc)
                (:id id-or-doc)
@@ -174,8 +185,8 @@
 
   SimpleExtOps
   (drop! [this] (clean-table db-spec table))
-  (up? [this] true) ;TODO: delete & extract
-  (exists? [this] true) ;TODO: implement
+  (up? [this] true)                                         ;TODO: delete & extract
+  (exists? [this] true)                                     ;TODO: implement
   (take-all [this] (take (count this) this))
 
   ;TODO: delete & extract

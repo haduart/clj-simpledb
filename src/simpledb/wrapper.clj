@@ -53,9 +53,13 @@
         true)
       false)))
 
-(defn store [^String database key map]
-  (let [historianDB (newDB (temporary-jndi-check) database)]
-    (db/assoc! historianDB key map)))
+(defn store
+  ([^String database key map]
+   (let [historianDB (newDB (temporary-jndi-check) database)]
+     (db/assoc! historianDB key map)))
+  ([^String database map]
+   (let [historianDB (newDB (temporary-jndi-check) database)]
+     (db/assoc! historianDB map))))
 
 (defn remove-value [^String database key]
   (let [historianDB (newDB (temporary-jndi-check) database)]

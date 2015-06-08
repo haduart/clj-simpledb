@@ -1,4 +1,4 @@
-(defproject simpledb "0.1.15-SNAPSHOT"
+(defproject be.dsquare/simpledb "0.1.15"
   :description "Simple SQL database access"
   :url "https://github.com/haduart/clj-simpledb"
   :license {:name "BSD"
