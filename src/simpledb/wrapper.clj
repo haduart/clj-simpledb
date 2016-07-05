@@ -5,25 +5,18 @@
             [clojure.java.jdbc :as jdbc])
   (:import [clojure.lang Keyword]))
 
-;TODO: delete & extract
-(def dev-db {:classname   "com.mysql.jdbc.Driver"
-             :subprotocol "mysql"
-             :subname     "//localhost:3306/hps"
-             :user        "root"
-             :password    ""})
-;TODO: delete & extract
-(def prd-db {:name "java:/jboss/datasources/dsq-hps-ds"})
+(def devDb (atom nil))
+(def prdDb (atom nil))
 
-;TODO: delete
 (defn temporary-jndi-check
   "Checks if it can use JNDI otherwise it uses a hardcoded connection"
   []
   (try
     (do
-      (-> (jdbc/get-connection prd-db)
-        (.close))
-      prd-db)
-    (catch Exception e dev-db)))
+      (-> (jdbc/get-connection @prdDb)
+          (.close))
+      @prdDb)
+    (catch Exception e @devDb)))
 
 (defn count-db [historianDB]
   (count historianDB))
@@ -122,12 +115,11 @@
 (defn add-configuration-watch [^clojure.lang.Namespace namespace
                                ^clojure.lang.IRef reference]
   (add-watch reference
-    :configuration (fn [key reference old-state new-state]
-                     (update-value (cast-namespace namespace) ":configuration" (dissoc new-state :_id :_rev)))))
+             :configuration (fn [key reference old-state new-state]
+                              (update-value (cast-namespace namespace) ":configuration" (dissoc new-state :_id :_rev)))))
 
-;TODO: delete & extract
 (defprotocol DatabaseHandler
-  (init [this])
+  (init [this dev-db prd-db])
   (destroy [this]))
 
 (defrecord Database [^clojure.lang.Namespace namespace
@@ -138,7 +130,9 @@
     (when (server-is-up? (cast-namespace (:namespace this)))
       (remove-configuration-watch (:reference this))))
 
-  (init [this]
+  (init [this dev-db prd-db]
+    (reset! devDb dev-db)
+    (reset! prdDb prd-db)
     (when (server-is-up? (cast-namespace (:namespace this)))
       (when (first-time? (cast-namespace (:namespace this)))
         (store (cast-namespace (:namespace this)) ":configuration" @(:reference this)))
