@@ -13,8 +13,9 @@
   []
   (try
     (do
-      (-> (jdbc/get-connection @prdDb)
-          (.close))
+      (->
+        (jdbc/get-connection @prdDb)
+        (.close))
       @prdDb)
     (catch Exception e @devDb)))
 
